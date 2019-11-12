@@ -57,13 +57,13 @@ LIS2DW12Sensor::LIS2DW12Sensor(TwoWire *i2c, uint8_t address) : dev_i2c(i2c), ad
 
     /* Enable register address automatically incremented during a multiple byte
   access with a serial interface. */
-  if (lis2dw12_auto_increment_set(&reg_ctx, PROPERTY_ENABLE) != 0)
+  if (lis2dw12_auto_increment_set(&reg_ctx, PROPERTY_DISABLE) != 0)
   {
     return;
   }
 
   /* Enable BDU */
-  if (lis2dw12_block_data_update_set(&reg_ctx, PROPERTY_ENABLE) != 0)
+  if (lis2dw12_block_data_update_set(&reg_ctx, PROPERTY_DISABLE) != 0)
   {
     return;
   }
@@ -75,31 +75,31 @@ LIS2DW12Sensor::LIS2DW12Sensor(TwoWire *i2c, uint8_t address) : dev_i2c(i2c), ad
   }
 
   /* Power mode selection */
-  if (lis2dw12_power_mode_set(&reg_ctx, LIS2DW12_HIGH_PERFORMANCE) != 0)
+  if (lis2dw12_power_mode_set(&reg_ctx, LIS2DW12_CONT_LOW_PWR_12bit) != 0)
   {
     return;
   }
 
   /* Output data rate selection - power down. */
-  if (lis2dw12_data_rate_set(&reg_ctx, LIS2DW12_XL_ODR_OFF) != 0)
+  if (lis2dw12_data_rate_set(&reg_ctx, LIS2DW12_XL_ODR_1Hz6_LP_ONLY) != 0)
   {
     return;
   }
 
   /* Full scale selection. */
-  if (lis2dw12_full_scale_set(&reg_ctx, LIS2DW12_2g) != 0)
+  if (lis2dw12_full_scale_set(&reg_ctx, LIS2DW12_16g) != 0)
   {
     return;
   }
 
   /* Select default output data rate. */
-  X_Last_ODR = 100.0f;
+  X_Last_ODR = ODRTEMP;
 
-  X_Last_Operating_Mode = LIS2DW12_HIGH_PERFORMANCE_MODE;
+  X_Last_Operating_Mode = LIS2DW12_LOW_POWER_MODE1;
 
-  X_Last_Noise = LIS2DW12_LOW_NOISE_DISABLE;
+  X_Last_Noise = LIS2DW12_LOW_NOISE_ENABLE;
 
-  X_isEnabled = 0;
+  X_isEnabled = 1;
 
   return;
 }
@@ -109,6 +109,8 @@ LIS2DW12Sensor::LIS2DW12Sensor(TwoWire *i2c, uint8_t address) : dev_i2c(i2c), ad
  * @param cs_pin the chip select pin
  * @param spi_speed the SPI speed
  */
+ 
+
 LIS2DW12Sensor::LIS2DW12Sensor(SPIClass *spi, int cs_pin, uint32_t spi_speed) : dev_spi(spi), cs_pin(cs_pin), spi_speed(spi_speed)
 {
   reg_ctx.write_reg = LIS2DW12_io_write;
@@ -641,7 +643,7 @@ LIS2DW12StatusTypeDef LIS2DW12Sensor::Get_X_ODR(float* odr)
  */
 LIS2DW12StatusTypeDef LIS2DW12Sensor::Set_X_ODR(float odr)
 { 
-  return Set_X_ODR_With_Mode(odr, LIS2DW12_HIGH_PERFORMANCE_MODE, LIS2DW12_LOW_NOISE_DISABLE);
+  return Set_X_ODR_With_Mode(odr, LIS2DW12_LOW_POWER_MODE1, LIS2DW12_LOW_NOISE_ENABLE);
 }
 
 /**
@@ -686,7 +688,6 @@ LIS2DW12StatusTypeDef LIS2DW12Sensor::Set_X_ODR_When_Enabled(float odr, LIS2DW12
   switch (mode)
   {
     case LIS2DW12_HIGH_PERFORMANCE_MODE:
-    default:
       switch (noise)
       {
         case LIS2DW12_LOW_NOISE_DISABLE:
@@ -759,21 +760,22 @@ LIS2DW12StatusTypeDef LIS2DW12Sensor::Set_X_ODR_When_Enabled(float odr, LIS2DW12
       }
       break;
     case LIS2DW12_LOW_POWER_MODE1:
+	default:
       switch (noise)
       {
         case LIS2DW12_LOW_NOISE_DISABLE:
-        default:
           new_power_mode = LIS2DW12_CONT_LOW_PWR_12bit; 
           break;
         case LIS2DW12_LOW_NOISE_ENABLE:
+		default:
           new_power_mode = LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit;
           break;
       }
 
       /* If Low Power mode maximum ODR is 200Hz */
-      if(odr > 200.0f)
+      if(odr > ODRTEMP)
       {
-        odr = 200.0f;
+        odr = ODRTEMP;
       }
       break;
   }

@@ -63,6 +63,9 @@
 #define LIS2DW12_ACC_SENSITIVITY_FOR_FS_16G_LOPOW1_MODE  7.808f  /**< Sensitivity value for 16g full scale, Low-power1 mode [mg/LSB] */
 #define LIS2DW12_ACC_SENSITIVITY_FOR_FS_16G_OTHER_MODES  1.952f  /**< Sensitivity value for 16g full scale, all other modes except Low-power1 [mg/LSB] */
 
+
+
+
 /* Typedefs ------------------------------------------------------------------*/
 typedef enum
 {
@@ -111,7 +114,7 @@ class LIS2DW12Sensor
     LIS2DW12StatusTypeDef Get_X_AxesRaw(int16_t *value);
     LIS2DW12StatusTypeDef Get_X_ODR(float *odr);
     LIS2DW12StatusTypeDef Set_X_ODR(float odr);
-    LIS2DW12StatusTypeDef Set_X_ODR_With_Mode(float odr, LIS2DW12_Operating_Mode_t mode=LIS2DW12_HIGH_PERFORMANCE_MODE, LIS2DW12_Low_Noise_t noise=LIS2DW12_LOW_NOISE_DISABLE);
+    LIS2DW12StatusTypeDef Set_X_ODR_With_Mode(float odr, LIS2DW12_Operating_Mode_t mode=LIS2DW12_LOW_POWER_MODE1, LIS2DW12_Low_Noise_t noise=LIS2DW12_LOW_NOISE_ENABLE);
     LIS2DW12StatusTypeDef Get_X_FS(float *full_scale);
     LIS2DW12StatusTypeDef Set_X_FS(float full_scale);
     LIS2DW12StatusTypeDef Enable_Wake_Up_Detection(void);
@@ -135,6 +138,7 @@ class LIS2DW12Sensor
     LIS2DW12StatusTypeDef Set_FIFO_Mode(uint8_t mode);
     LIS2DW12StatusTypeDef ReadReg(uint8_t reg, uint8_t *data);
     LIS2DW12StatusTypeDef WriteReg(uint8_t reg, uint8_t data);
+	float ODRTEMP;
     
     /**
      * @brief Utility function to read data.
